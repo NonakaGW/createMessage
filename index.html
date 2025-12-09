@@ -54,10 +54,6 @@
       font-size: 0.9rem;
     }
 
-    .status-group label {
-      cursor: pointer;
-    }
-
     .buttons {
       display: flex;
       gap: 8px;
@@ -96,11 +92,25 @@
       min-height: 140px;
     }
 
-    .note {
-      font-size: 0.8rem;
-      color: #6b7280;
-      margin-top: 4px;
+    .copy-box {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
     }
+
+    .copy-btn {
+      background: #10b981;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .copy-btn:hover {
+      filter: brightness(0.95);
+    }
+
   </style>
 </head>
 <body>
@@ -118,8 +128,7 @@
           <th>勤務区分</th>
         </tr>
       </thead>
-      <tbody id="member-rows">
-      </tbody>
+      <tbody id="member-rows"></tbody>
     </table>
 
     <div class="buttons">
@@ -131,10 +140,13 @@
   <div class="card">
     <p>生成されたメッセージ：</p>
     <textarea id="output" placeholder="ここにメッセージが表示されます。"></textarea>
+
+    <div class="copy-box">
+      <button class="copy-btn" id="copyBtn">コピー</button>
+    </div>
   </div>
 
   <script>
-    // メンバー定義＋デフォルトステータス
     const members = [
       { name: "市川", default: "出社", hasExternal: false },
       { name: "吉永", default: "出社", hasExternal: false },
@@ -143,15 +155,14 @@
       { name: "島倉", default: "出社", hasExternal: true },
       { name: "三本", default: "出社", hasExternal: true },
       { name: "野中", default: "出社", hasExternal: true },
-      { name: "小田部", default: "在宅", hasExternal: true },
       { name: "軽石", default: "出社", hasExternal: true },
+      { name: "小田部", default: "在宅", hasExternal: true },
       { name: "宮本", default: "在宅", hasExternal: true },
     ];
 
     const STATUSES = ["出社", "在宅", "休み"];
     const EXTERNAL = "外部講師";
 
-    // 行を生成（デフォルトチェックあり）
     function buildRows() {
       const tbody = document.getElementById("member-rows");
       tbody.innerHTML = "";
@@ -173,15 +184,15 @@
         STATUSES.forEach(statusLabel => {
           const id = `${groupName}-${statusLabel}`;
           const label = document.createElement("label");
-
           const input = document.createElement("input");
+
           input.type = "radio";
           input.name = groupName;
           input.value = statusLabel;
           input.id = id;
 
-          // デフォルト選択
-          if (member.default === statusLabel) input.checked = true;
+          if (member.default === statusLabel)
+            input.checked = true;
 
           label.htmlFor = id;
           label.appendChild(input);
@@ -189,11 +200,11 @@
           groupDiv.appendChild(label);
         });
 
-        // 外部講師項目
         if (member.hasExternal) {
           const id = `${groupName}-${EXTERNAL}`;
           const label = document.createElement("label");
           const input = document.createElement("input");
+
           input.type = "radio";
           input.name = groupName;
           input.value = EXTERNAL;
@@ -212,7 +223,6 @@
       });
     }
 
-    // メッセージ生成
     function generateMessage() {
       const groups = {
         "出社": [],
@@ -242,16 +252,25 @@
       document.getElementById("output").value = lines.join("\n");
     }
 
-    // リセット（デフォルトに戻す）
     function clearAll() {
       buildRows();
       document.getElementById("output").value = "";
     }
 
+    // ★ コピー機能
+    function copyToClipboard() {
+      const text = document.getElementById("output").value;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("コピーしました！");
+      });
+    }
+
+    // 初期化
     buildRows();
     document.getElementById("generateBtn").addEventListener("click", generateMessage);
     document.getElementById("clearBtn").addEventListener("click", clearAll);
+    document.getElementById("copyBtn").addEventListener("click", copyToClipboard);
   </script>
+
 </body>
 </html>
-
