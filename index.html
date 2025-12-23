@@ -30,7 +30,9 @@
       flex-wrap: wrap;
       font-size: 0.9rem;
     }
-    button {
+
+    /* ボタン共通 */
+    button, .copy-btn {
       border: none;
       border-radius: 999px;
       padding: 8px 16px;
@@ -38,11 +40,24 @@
       cursor: pointer;
       background: #2563eb;
       color: #fff;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s;
     }
+
     button.secondary {
       background: #e5e7eb;
       color: #111827;
     }
+
+    button:hover, .copy-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active, .copy-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+
     textarea {
       width: 100%;
       min-height: 140px;
@@ -64,11 +79,7 @@
     }
     .copy-btn {
       background: #10b981;
-      padding: 6px 14px;
-      border-radius: 999px;
-      cursor: pointer;
       font-size: 0.85rem;
-      color: #fff;
     }
     input:disabled {
       opacity: 0.5;
@@ -125,11 +136,10 @@
     tbody.innerHTML = "";
 
     members.forEach((m, i) => {
-      const tr = document.createElement("tr");
-
       const baseStatuses = ["出社", "在宅", "休み"];
       if (m.canExternal) baseStatuses.push("外部講師");
 
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="name-col">${m.name}</td>
         <td>
@@ -144,18 +154,11 @@
         </td>
         <td>
           <div class="group">
-            <label>
-              <input type="checkbox" name="am-${i}">
-              午前休
-            </label>
-            <label>
-              <input type="checkbox" name="pm-${i}">
-              午後休
-            </label>
+            <label><input type="checkbox" name="am-${i}"> 午前休</label>
+            <label><input type="checkbox" name="pm-${i}"> 午後休</label>
           </div>
         </td>
       `;
-
       tbody.appendChild(tr);
 
       const baseRadios = tr.querySelectorAll(`input[name="base-${i}"]`);
@@ -176,12 +179,8 @@
         });
       });
 
-      am.addEventListener("change", () => {
-        if (am.checked) pm.checked = false;
-      });
-      pm.addEventListener("change", () => {
-        if (pm.checked) am.checked = false;
-      });
+      am.addEventListener("change", () => { if (am.checked) pm.checked = false; });
+      pm.addEventListener("change", () => { if (pm.checked) am.checked = false; });
 
       const initial = [...baseRadios].find(r => r.checked)?.value;
       if (initial === "休み") {
@@ -192,16 +191,10 @@
   }
 
   function generate() {
-    const result = {
-      出社: [],
-      在宅: [],
-      休み: [],
-      外部講師: []
-    };
+    const result = { 出社: [], 在宅: [], 休み: [], 外部講師: [] };
 
     members.forEach((m, i) => {
-      const base = [...document.getElementsByName(`base-${i}`)]
-        .find(r => r.checked).value;
+      const base = [...document.getElementsByName(`base-${i}`)].find(r => r.checked).value;
       const amOff = document.querySelector(`input[name="am-${i}"]`).checked;
       const pmOff = document.querySelector(`input[name="pm-${i}"]`).checked;
 
@@ -218,16 +211,15 @@
       }
     });
 
-    const lines = [];
-    lines.push("おはようございます。");
-    lines.push("本日の教育部の勤務状況は下記のとおりです。");
-    lines.push("");
-    lines.push(`出社：${result["出社"].join("、")}`);
-    lines.push(`在宅：${result["在宅"].join("、")}`);
-    lines.push(`休み：${result["休み"].join("、")}`);
-    if (result["外部講師"].length > 0) {
-      lines.push(`外部講師：${result["外部講師"].join("、")}`);
-    }
+    const lines = [
+      "おはようございます。",
+      "本日の教育部の勤務状況は下記のとおりです。",
+      " ",
+      `出社：${result["出社"].join("、")}`,
+      `在宅：${result["在宅"].join("、")}`,
+      `休み：${result["休み"].join("、")}`,
+      result["外部講師"].length ? `外部講師：${result["外部講師"].join("、")}` : ""
+    ].filter(Boolean);
 
     document.getElementById("output").value = lines.join("\n");
   }
@@ -241,9 +233,12 @@
   }
 
   build();
-  document.getElementById("generate").addEventListener("click", generate);
-  document.getElementById("reset").addEventListener("click", build);
-  document.getElementById("copy").addEventListener("click", copyToClipboard);
+  document.getElementById("generate").onclick = generate;
+  document.getElementById("reset").onclick = () => {
+    build();
+    document.getElementById("output").value = "";
+  };
+  document.getElementById("copy").onclick = copyToClipboard;
 </script>
 
 </body>
