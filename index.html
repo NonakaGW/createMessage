@@ -145,7 +145,7 @@
     tbody.innerHTML = "";
 
     members.forEach((m, i) => {
-      const baseStatuses = ["出社", "在宅", "休み"];
+      const baseStatuses = ["出社", "在宅", "外出", "休み"];
       if (m.canExternal) baseStatuses.push("外部講師");
 
       const tr = document.createElement("tr");
