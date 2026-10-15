@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -67,6 +68,7 @@
       border: 1px solid #d1d5db;
       font-size: 0.9rem;
       resize: vertical;
+      box-sizing: border-box;
     }
     .buttons {
       display: flex;
@@ -188,8 +190,13 @@
         });
       });
 
-      am.addEventListener("change", () => { if (am.checked) pm.checked = false; });
-      pm.addEventListener("change", () => { if (pm.checked) am.checked = false; });
+      am.addEventListener("change", () => {
+        if (am.checked) pm.checked = false;
+      });
+
+      pm.addEventListener("change", () => {
+        if (pm.checked) am.checked = false;
+      });
 
       const initial = [...baseRadios].find(r => r.checked)?.value;
       if (initial === "休み") {
@@ -200,10 +207,20 @@
   }
 
   function generate() {
-    const result = { 出社: [], 在宅: [], 休み: [], 外部講師: [] };
+
+    // 修正①：「外出」を追加
+    const result = {
+      出社: [],
+      在宅: [],
+      外出: [],
+      休み: [],
+      外部講師: []
+    };
 
     members.forEach((m, i) => {
-      const base = [...document.getElementsByName(`base-${i}`)].find(r => r.checked).value;
+      const base = [...document.getElementsByName(`base-${i}`)]
+        .find(r => r.checked).value;
+
       const amOff = document.querySelector(`input[name="am-${i}"]`).checked;
       const pmOff = document.querySelector(`input[name="pm-${i}"]`).checked;
 
@@ -220,6 +237,7 @@
       }
     });
 
+    // 修正②：「外出」の表示行を追加
     const lines = [
       "おはようございます。",
       "本日の教育部の勤務状況は下記のとおりです。",
@@ -227,7 +245,12 @@
       `出社：${result["出社"].join("、")}`,
       `在宅：${result["在宅"].join("、")}`,
       `休み：${result["休み"].join("、")}`,
-      result["外部講師"].length ? `外部講師：${result["外部講師"].join("、")}` : ""
+      result["外出"].length
+        ? `外出：${result["外出"].join("、")}`
+        : "",
+      result["外部講師"].length
+        ? `外部講師：${result["外部講師"].join("、")}`
+        : ""
     ].filter(Boolean);
 
     document.getElementById("output").value = lines.join("\n");
@@ -236,25 +259,23 @@
   function copyToClipboard() {
     const text = document.getElementById("output").value;
     if (!text) return;
+
     navigator.clipboard.writeText(text).then(() => {
       alert("コピーしました！");
     });
   }
 
   build();
+
   document.getElementById("generate").onclick = generate;
+
   document.getElementById("reset").onclick = () => {
     build();
     document.getElementById("output").value = "";
   };
+
   document.getElementById("copy").onclick = copyToClipboard;
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
